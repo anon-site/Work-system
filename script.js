@@ -97,12 +97,7 @@ function setupEventListeners() {
     // Search functionality
     document.getElementById('searchInput').addEventListener('input', handleSearch);
     
-    // Modal close on outside click
-    document.getElementById('editModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeEditModal();
-        }
-    });
+    // Removed outside click handler to prevent closing modal when clicking outside
 }
 
 // Language Management
