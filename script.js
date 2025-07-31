@@ -45,7 +45,7 @@ function setupEventListeners() {
         if (isMobile) {
             const submitBtn = document.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (currentLanguage === 'ar' ? 'جاري الحفظ...' : 'Saving...');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             submitBtn.disabled = true;
             
             // Force UI update before processing
@@ -121,96 +121,8 @@ const translations = {
         'Delete': 'Delete',
         'Search entries...': 'Search entries...',
         'Additional notes...': 'Additional notes...'
-    },
-    ar: {
-        'Time Tracker Pro': 'متتبع الوقت المحترف',
-        'Add Work Entry': 'إضافة إدخال عمل',
-        'Date': 'التاريخ',
-        'Start Time': 'بداية الدوام',
-        'End Time': 'نهاية الدوام',
-        'Hours Worked': 'عدد الساعات',
-        'Hourly Rate (€)': 'الأجر بالساعة (€)',
-        'Total Earnings (€)': 'إجمالي الأرباح (€)',
-        'Withdrawn Amount (€)': 'المبلغ المسحوب (€)',
-        'Remaining Amount (€)': 'المبلغ المتبقي (€)',
-        'Notes': 'ملاحظات',
-        'Save Entry': 'حفظ الإدخال',
-        'Clear': 'مسح',
-        'Work Entries': 'إدخالات العمل',
-        'Start': 'البداية',
-        'End': 'النهاية',
-        'Hours': 'الساعات',
-        'Rate (€)': 'السعر (€)',
-        'Earnings (€)': 'الأرباح (€)',
-        'Withdrawn (€)': 'مسحوب (€)',
-        'Remaining (€)': 'متبقي (€)',
-        'Actions': 'الإجراءات',
-        'إجمالي الأيام': 'إجمالي الأيام',
-        'إجمالي الساعات': 'إجمالي الساعات',
-        'إجمالي الأرباح': 'إجمالي الأرباح',
-        'إجمالي المسحوب': 'إجمالي المسحوب',
-        'إجمالي المتبقي': 'إجمالي المتبقي',
-        'Edit Entry': 'تعديل الإدخال',
-        'Update': 'تحديث',
-        'Cancel': 'إلغاء',
-        'Export PDF': 'تصدير PDF',
-        'Edit': 'تعديل',
-        'Delete': 'حذف',
-        'Search entries...': 'البحث في الإدخالات...',
-        'Additional notes...': 'ملاحظات إضافية...'
     }
 };
-
-function toggleLanguage() {
-    // Add transition class to body for smooth language switch
-    document.body.style.opacity = '0.7';
-    document.body.style.transition = 'opacity 0.3s ease';
-    
-    // Force reflow
-    void document.body.offsetWidth;
-    
-    // Toggle language after a short delay
-    setTimeout(() => {
-        currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-        
-        // Update HTML attributes
-        document.documentElement.lang = currentLanguage;
-        document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
-        
-        // Update language toggle button
-        const langText = document.querySelector('.lang-text');
-        langText.textContent = currentLanguage === 'en' ? 'العربية' : 'English';
-        
-        // Update all translatable elements
-        const elements = document.querySelectorAll('[data-en], [data-ar]');
-        elements.forEach(element => {
-            const key = element.getAttribute(`data-${currentLanguage}`);
-            if (key && translations[currentLanguage][key]) {
-                element.textContent = translations[currentLanguage][key];
-            }
-        });
-        
-        // Update placeholders
-        const placeholderElements = document.querySelectorAll('[data-en-placeholder], [data-ar-placeholder]');
-        placeholderElements.forEach(element => {
-            const key = element.getAttribute(`data-${currentLanguage}-placeholder`);
-            if (key) {
-                element.placeholder = key;
-            }
-        });
-        
-        // Re-render table to update content
-        renderTable();
-        
-        // Fade back in
-        document.body.style.opacity = '1';
-        
-        // Remove transition after completion
-        setTimeout(() => {
-            document.body.style.transition = '';
-        }, 300);
-    }, 300);
-}
 
 // Form Handling
 function handleFormSubmit(e) {
@@ -375,7 +287,7 @@ function renderTable() {
             <tr>
                 <td colspan="10" style="text-align: center; padding: 40px; color: var(--gray-500);">
                     <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                    ${currentLanguage === 'en' ? 'No entries yet. Add your first work entry above!' : 'لا توجد إدخالات بعد. أضف أول إدخال عمل أعلاه!'}
+                    No entries yet. Add your first work entry above!
                 </td>
             </tr>
         `;
@@ -398,11 +310,11 @@ function renderTable() {
                 <div class="action-buttons">
                     <button class="btn btn-edit" onclick="editEntry(${entry.id})">
                         <i class="fas fa-edit"></i>
-                        <span data-en="Edit" data-ar="تعديل">${currentLanguage === 'en' ? 'Edit' : 'تعديل'}</span>
+                        <span>Edit</span>
                     </button>
                     <button class="btn btn-danger" onclick="deleteEntry(${entry.id})">
                         <i class="fas fa-trash"></i>
-                        <span data-en="Delete" data-ar="حذف">${currentLanguage === 'en' ? 'Delete' : 'حذف'}</span>
+                        <span>Delete</span>
                     </button>
                 </div>
             </td>
@@ -441,7 +353,7 @@ function editEntry(id) {
 function deleteEntry(id) {
     const confirmMessage = currentLanguage === 'en' 
         ? 'Are you sure you want to delete this entry?' 
-        : 'هل أنت متأكد من حذف هذا الإدخال؟';
+        : 'Are you sure you want to delete this entry?';
         
     if (confirm(confirmMessage)) {
         workEntries = workEntries.filter(e => e.id !== id);
@@ -512,7 +424,23 @@ function updateCalculations() {
 
 // Local Storage Management
 function saveToLocalStorage() {
-    localStorage.setItem('timeTrackerEntries', JSON.stringify(workEntries));
+    try {
+        localStorage.setItem('timeTrackerEntries', JSON.stringify(workEntries));
+        console.log('Saved to localStorage:', workEntries.length, 'entries');
+    } catch (e) {
+        console.error('Error saving to localStorage:', e);
+        // If localStorage is full, try to save a limited number of entries
+        if (e.name === 'QuotaExceededError') {
+            try {
+                // Keep only the most recent 100 entries
+                const limitedEntries = workEntries.slice(-100);
+                localStorage.setItem('timeTrackerEntries', JSON.stringify(limitedEntries));
+                console.warn('LocalStorage full, saved only most recent 100 entries');
+            } catch (e2) {
+                console.error('Failed to save limited entries to localStorage:', e2);
+            }
+        }
+    }
 }
 
 // Database Management
@@ -541,66 +469,138 @@ function initDatabase() {
 }
 
 function saveToDatabase() {
+    // Always save to localStorage as a fallback
+    saveToLocalStorage();
+    
     if (!db) {
-        console.warn('Database not initialized, falling back to localStorage');
-        saveToLocalStorage();
+        console.warn('Database not initialized, using localStorage only');
         return Promise.resolve();
     }
     
     return new Promise((resolve, reject) => {
-        const transaction = db.transaction(['workEntries'], 'readwrite');
-        const store = transaction.objectStore('workEntries');
-        
-        // Clear existing entries and save new ones
-        const clearRequest = store.clear();
-        clearRequest.onsuccess = () => {
-            const addPromises = workEntries.map(entry => {
-                return new Promise((resolveAdd, rejectAdd) => {
-                    const addRequest = store.add(entry);
-                    addRequest.onsuccess = () => resolveAdd();
-                    addRequest.onerror = () => rejectAdd(addRequest.error);
-                });
-            });
+        try {
+            const transaction = db.transaction(['workEntries'], 'readwrite');
+            const store = transaction.objectStore('workEntries');
             
-            Promise.all(addPromises)
-                .then(() => resolve())
-                .catch(reject);
-        };
-        clearRequest.onerror = () => reject(clearRequest.error);
+            // Clear existing entries and save new ones
+            const clearRequest = store.clear();
+            
+            clearRequest.onsuccess = () => {
+                if (workEntries.length === 0) {
+                    resolve();
+                    return;
+                }
+                
+                const addPromises = workEntries.map(entry => {
+                    return new Promise((resolveAdd, rejectAdd) => {
+                        try {
+                            const addRequest = store.add(entry);
+                            addRequest.onsuccess = () => resolveAdd();
+                            addRequest.onerror = (e) => {
+                                console.error('Error adding entry:', e.target.error);
+                                rejectAdd(e.target.error);
+                            };
+                        } catch (e) {
+                            console.error('Error in saveToDatabase:', e);
+                            rejectAdd(e);
+                        }
+                    });
+                });
+                
+                Promise.all(addPromises)
+                    .then(() => resolve())
+                    .catch(error => {
+                        console.error('Error in saveToDatabase Promise.all:', error);
+                        reject(error);
+                    });
+            };
+            
+            clearRequest.onerror = (e) => {
+                console.error('Error clearing database:', e.target.error);
+                reject(e.target.error);
+            };
+            
+            transaction.onerror = (e) => {
+                console.error('Transaction error:', e.target.error);
+                reject(e.target.error);
+            };
+        } catch (e) {
+            console.error('Error in saveToDatabase:', e);
+            reject(e);
+        }
     });
 }
 
 function loadFromDatabase() {
-    if (!db) {
-        console.warn('Database not initialized, falling back to localStorage');
-        loadFromLocalStorage();
-        return Promise.resolve();
-    }
-    
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(['workEntries'], 'readonly');
-        const store = transaction.objectStore('workEntries');
-        const request = store.getAll();
-        
-        request.onsuccess = () => {
-            workEntries = request.result;
-            if (workEntries.length === 0) {
-                // Fallback to localStorage if database is empty
-                loadFromLocalStorage();
-            }
-            renderTable();
-            updateSummaryCards();
+    return new Promise((resolve) => {
+        if (!db) {
+            console.warn('Database not initialized, falling back to localStorage');
+            loadFromLocalStorage();
             resolve();
-        };
+            return;
+        }
         
-        request.onerror = () => reject(request.error);
+        try {
+            const transaction = db.transaction(['workEntries'], 'readonly');
+            const store = transaction.objectStore('workEntries');
+            const request = store.getAll();
+            
+            request.onsuccess = () => {
+                workEntries = request.result || [];
+                console.log('Loaded from database:', workEntries.length, 'entries');
+                
+                if (workEntries.length === 0) {
+                    // Fallback to localStorage if database is empty
+                    console.log('No entries in database, checking localStorage...');
+                    loadFromLocalStorage();
+                } else {
+                    renderTable();
+                    updateSummaryCards();
+                }
+                resolve();
+            };
+            
+            request.onerror = (e) => {
+                console.error('Error loading from database:', e.target.error);
+                // Fallback to localStorage on error
+                loadFromLocalStorage();
+                resolve();
+            };
+            
+            transaction.onerror = (e) => {
+                console.error('Transaction error while loading:', e.target.error);
+                // Fallback to localStorage on transaction error
+                loadFromLocalStorage();
+                resolve();
+            };
+        } catch (e) {
+            console.error('Error in loadFromDatabase:', e);
+            // Fallback to localStorage on any error
+            loadFromLocalStorage();
+            resolve();
+        }
     });
 }
 
 function loadFromLocalStorage() {
-    const stored = localStorage.getItem('timeTrackerEntries');
-    if (stored) {
-        workEntries = JSON.parse(stored);
+    try {
+        const stored = localStorage.getItem('timeTrackerEntries');
+        if (stored) {
+            workEntries = JSON.parse(stored) || [];
+            console.log('Loaded from localStorage:', workEntries.length, 'entries');
+            renderTable();
+            updateSummaryCards();
+        } else {
+            console.log('No entries found in localStorage');
+            workEntries = [];
+            renderTable();
+            updateSummaryCards();
+        }
+    } catch (e) {
+        console.error('Error loading from localStorage:', e);
+        workEntries = [];
+        renderTable();
+        updateSummaryCards();
     }
 }
 
@@ -678,7 +678,7 @@ function exportToPDF() {
         const exportBtn = document.querySelector('.export-pdf');
         if (exportBtn) {
             const originalText = exportBtn.innerHTML;
-            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (currentLanguage === 'ar' ? 'جاري التصدير...' : 'Exporting...');
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
             exportBtn.disabled = true;
             
             // Force UI update before processing
