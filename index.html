@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Time Tracker Pro</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <i class="fas fa-clock"></i>
+                    <span data-en="Time Tracker Pro" data-ar="متتبع الوقت المحترف">Time Tracker Pro</span>
+                </h1>
+                <div class="header-controls">
+                    <button class="lang-toggle" onclick="toggleLanguage()">
+                        <i class="fas fa-language"></i>
+                        <span class="lang-text">العربية</span>
+                    </button>
+                    <button class="export-btn" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        <span data-en="Export PDF" data-ar="تصدير PDF">Export PDF</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Data Entry Form -->
+            <section class="form-section">
+                <h2 data-en="Add Work Entry" data-ar="إضافة إدخال عمل">Add Work Entry</h2>
+                <form id="timeForm" class="time-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="date" data-en="Date" data-ar="التاريخ">Date</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="startTime" data-en="Start Time" data-ar="بداية الدوام">Start Time</label>
+                            <input type="time" id="startTime" name="startTime" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endTime" data-en="End Time" data-ar="نهاية الدوام">End Time</label>
+                            <input type="time" id="endTime" name="endTime" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="hours" data-en="Hours Worked" data-ar="عدد الساعات">Hours Worked</label>
+                            <input type="number" id="hours" name="hours" step="0.25" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="hourlyRate" data-en="Hourly Rate (€)" data-ar="الأجر بالساعة (€)">Hourly Rate (€)</label>
+                            <input type="number" id="hourlyRate" name="hourlyRate" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="totalEarnings" data-en="Total Earnings (€)" data-ar="إجمالي الأرباح (€)">Total Earnings (€)</label>
+                            <input type="number" id="totalEarnings" name="totalEarnings" step="0.01" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="withdrawnAmount" data-en="Withdrawn Amount (€)" data-ar="المبلغ المسحوب (€)">Withdrawn Amount (€)</label>
+                            <input type="number" id="withdrawnAmount" name="withdrawnAmount" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="remainingAmount" data-en="Remaining Amount (€)" data-ar="المبلغ المتبقي (€)">Remaining Amount (€)</label>
+                            <input type="number" id="remainingAmount" name="remainingAmount" step="0.01" readonly>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="notes" data-en="Notes" data-ar="ملاحظات">Notes</label>
+                            <textarea id="notes" name="notes" rows="3" placeholder="Additional notes..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span data-en="Save Entry" data-ar="حفظ الإدخال">Save Entry</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-times"></i>
+                            <span data-en="Clear" data-ar="مسح">Clear</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Data Table -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2 data-en="Work Entries" data-ar="إدخالات العمل">Work Entries</h2>
+                    <div class="table-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search entries..." data-en-placeholder="Search entries..." data-ar-placeholder="البحث في الإدخالات...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="dataTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th data-en="Date" data-ar="التاريخ">Date</th>
+                                <th data-en="Start" data-ar="البداية">Start</th>
+                                <th data-en="End" data-ar="النهاية">End</th>
+                                <th data-en="Hours" data-ar="الساعات">Hours</th>
+                                <th data-en="Rate (€)" data-ar="السعر (€)">Rate (€)</th>
+                                <th data-en="Earnings (€)" data-ar="الأرباح (€)">Earnings (€)</th>
+                                <th data-en="Withdrawn (€)" data-ar="مسحوب (€)">Withdrawn (€)</th>
+                                <th data-en="Remaining (€)" data-ar="متبقي (€)">Remaining (€)</th>
+                                <th data-en="Notes" data-ar="ملاحظات">Notes</th>
+                                <th data-en="Actions" data-ar="الإجراءات">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-calendar-days"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 data-en="Total Days" data-ar="إجمالي الأيام">Total Days</h3>
+                            <p id="totalDays">0</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 data-en="Total Hours" data-ar="إجمالي الساعات">Total Hours</h3>
+                            <p id="totalHours">0</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-euro-sign"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 data-en="Total Earnings" data-ar="إجمالي الأرباح">Total Earnings</h3>
+                            <p id="totalEarningsSum">€0.00</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 data-en="Total Withdrawn" data-ar="إجمالي المسحوب">Total Withdrawn</h3>
+                            <p id="totalWithdrawn">€0.00</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 data-en="Total Remaining" data-ar="إجمالي المتبقي">Total Remaining</h3>
+                            <p id="totalRemaining">€0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-en="Edit Entry" data-ar="تعديل الإدخال">Edit Entry</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editForm" class="edit-form">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editDate" data-en="Date" data-ar="التاريخ">Date</label>
+                        <input type="date" id="editDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStartTime" data-en="Start Time" data-ar="بداية الدوام">Start Time</label>
+                        <input type="time" id="editStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEndTime" data-en="End Time" data-ar="نهاية الدوام">End Time</label>
+                        <input type="time" id="editEndTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editHourlyRate" data-en="Hourly Rate (€)" data-ar="الأجر بالساعة (€)">Hourly Rate (€)</label>
+                        <input type="number" id="editHourlyRate" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editWithdrawnAmount" data-en="Withdrawn Amount (€)" data-ar="المبلغ المسحوب (€)">Withdrawn Amount (€)</label>
+                        <input type="number" id="editWithdrawnAmount" step="0.01" min="0">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editNotes" data-en="Notes" data-ar="ملاحظات">Notes</label>
+                        <textarea id="editNotes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span data-en="Update" data-ar="تحديث">Update</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                        <i class="fas fa-times"></i>
+                        <span data-en="Cancel" data-ar="إلغاء">Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
