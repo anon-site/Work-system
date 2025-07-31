@@ -2,20 +2,36 @@
 let currentLanguage = 'en';
 let workEntries = [];
 let editingId = null;
+let db = null; // Database instance
 
 // Check if device is mobile
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 // Initialize the application when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    loadFromLocalStorage();
-    setupEventListeners();
-    updateCalculations();
-    updateSummaryCards();
-    renderTable();
-    
-    // Set today's date as default
-    document.getElementById('date').valueAsDate = new Date();
+    initDatabase()
+        .then(() => {
+            loadFromDatabase();
+            setupEventListeners();
+            updateCalculations();
+            updateSummaryCards();
+            renderTable();
+            
+            // Set today's date as default
+            document.getElementById('date').valueAsDate = new Date();
+        })
+        .catch(error => {
+            console.error('Failed to initialize database:', error);
+            // Fallback to localStorage if database fails
+            loadFromLocalStorage();
+            setupEventListeners();
+            updateCalculations();
+            updateSummaryCards();
+            renderTable();
+            
+            // Set today's date as default
+            document.getElementById('date').valueAsDate = new Date();
+        });
 });
 
 // Event Listeners Setup
@@ -215,13 +231,23 @@ function handleFormSubmit(e) {
     };
     
     workEntries.push(entry);
-    saveToLocalStorage();
-    renderTable();
-    updateSummaryCards();
-    clearForm();
     
-    // Show success message
-    showNotification('Entry saved successfully!', 'success');
+    // Save to database and localStorage
+    saveToDatabase()
+        .then(() => {
+            renderTable();
+            updateSummaryCards();
+            clearForm();
+            showNotification('Entry saved successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Failed to save to database:', error);
+            saveToLocalStorage(); // Fallback to localStorage
+            renderTable();
+            updateSummaryCards();
+            clearForm();
+            showNotification('Entry saved successfully!', 'success');
+        });
 }
 
 function handleEditSubmit(e) {
@@ -243,12 +269,22 @@ function handleEditSubmit(e) {
     entry.totalEarnings = entry.hours * entry.hourlyRate;
     entry.remainingAmount = entry.totalEarnings - entry.withdrawnAmount;
     
-    saveToLocalStorage();
-    renderTable();
-    updateSummaryCards();
-    closeEditModal();
-    
-    showNotification('Entry updated successfully!', 'success');
+    // Save to database and localStorage
+    saveToDatabase()
+        .then(() => {
+            renderTable();
+            updateSummaryCards();
+            closeEditModal();
+            showNotification('Entry updated successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Failed to update database:', error);
+            saveToLocalStorage(); // Fallback to localStorage
+            renderTable();
+            updateSummaryCards();
+            closeEditModal();
+            showNotification('Entry updated successfully!', 'success');
+        });
 }
 
 // Calculations
@@ -409,10 +445,21 @@ function deleteEntry(id) {
         
     if (confirm(confirmMessage)) {
         workEntries = workEntries.filter(e => e.id !== id);
-        saveToLocalStorage();
-        renderTable();
-        updateSummaryCards();
-        showNotification('Entry deleted successfully!', 'success');
+        
+        // Save to database and localStorage
+        saveToDatabase()
+            .then(() => {
+                renderTable();
+                updateSummaryCards();
+                showNotification('Entry deleted successfully!', 'success');
+            })
+            .catch(error => {
+                console.error('Failed to delete from database:', error);
+                saveToLocalStorage(); // Fallback to localStorage
+                renderTable();
+                updateSummaryCards();
+                showNotification('Entry deleted successfully!', 'success');
+            });
     }
 }
 
@@ -466,6 +513,88 @@ function updateCalculations() {
 // Local Storage Management
 function saveToLocalStorage() {
     localStorage.setItem('timeTrackerEntries', JSON.stringify(workEntries));
+}
+
+// Database Management
+function initDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('TimeTrackerDB', 1);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+            db = request.result;
+            resolve();
+        };
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            
+            // Create object store for work entries
+            if (!db.objectStoreNames.contains('workEntries')) {
+                const store = db.createObjectStore('workEntries', { keyPath: 'id', autoIncrement: true });
+                store.createIndex('date', 'date', { unique: false });
+                store.createIndex('startTime', 'startTime', { unique: false });
+                store.createIndex('endTime', 'endTime', { unique: false });
+            }
+        };
+    });
+}
+
+function saveToDatabase() {
+    if (!db) {
+        console.warn('Database not initialized, falling back to localStorage');
+        saveToLocalStorage();
+        return Promise.resolve();
+    }
+    
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['workEntries'], 'readwrite');
+        const store = transaction.objectStore('workEntries');
+        
+        // Clear existing entries and save new ones
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => {
+            const addPromises = workEntries.map(entry => {
+                return new Promise((resolveAdd, rejectAdd) => {
+                    const addRequest = store.add(entry);
+                    addRequest.onsuccess = () => resolveAdd();
+                    addRequest.onerror = () => rejectAdd(addRequest.error);
+                });
+            });
+            
+            Promise.all(addPromises)
+                .then(() => resolve())
+                .catch(reject);
+        };
+        clearRequest.onerror = () => reject(clearRequest.error);
+    });
+}
+
+function loadFromDatabase() {
+    if (!db) {
+        console.warn('Database not initialized, falling back to localStorage');
+        loadFromLocalStorage();
+        return Promise.resolve();
+    }
+    
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['workEntries'], 'readonly');
+        const store = transaction.objectStore('workEntries');
+        const request = store.getAll();
+        
+        request.onsuccess = () => {
+            workEntries = request.result;
+            if (workEntries.length === 0) {
+                // Fallback to localStorage if database is empty
+                loadFromLocalStorage();
+            }
+            renderTable();
+            updateSummaryCards();
+            resolve();
+        };
+        
+        request.onerror = () => reject(request.error);
+    });
 }
 
 function loadFromLocalStorage() {
