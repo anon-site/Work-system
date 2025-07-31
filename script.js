@@ -4,11 +4,33 @@ let workEntries = [];
 let editingId = null;
 let db = null; // Database instance
 
+// Check authentication status
+function checkAuth() {
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn') || localStorage.getItem('rememberMe');
+    if (!isLoggedIn) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+// Logout function
+function logout() {
+    // Clear session and redirect to login
+    sessionStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('rememberMe');
+    window.location.href = 'login.html';
+}
+
 // Check if device is mobile
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 // Initialize the application when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Check authentication first
+    if (!checkAuth()) return;
+    
+    // Initialize the database
     initDatabase()
         .then(() => {
             loadFromDatabase();

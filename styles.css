@@ -293,6 +293,45 @@ body {
     background: #b45309;
 }
 
+/* Header Buttons */
+.export-btn,
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--white);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+}
+
+.export-btn:hover,
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: var(--gray-50);
+}
+
+.export-btn i,
+.logout-btn i {
+    font-size: 1rem;
+}
+
+.logout-btn {
+    color: var(--danger-color);
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+.logout-btn:hover {
+    background-color: #fef2f2;
+}
+
 /* Table Section */
 .table-section {
     background: var(--white);
@@ -777,7 +816,6 @@ body {
     .data-table td:nth-child(5) {
         display: none;
     }
-}
 }
 
 /* Mobile devices */
