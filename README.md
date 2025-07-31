@@ -23,11 +23,19 @@ A professional bilingual web application for tracking work hours with Euro curre
 - **Remaining Amount**: Balance remaining
 - **Notes**: Additional comments
 
-### 💾 Local Database
+### ☁️ Cloud Database (NEW!)
+- **Firebase Integration**: Data stored in Google Cloud
+- **Cross-Device Sync**: Access from any device/browser
+- **Real-time Updates**: Changes appear instantly across devices
+- **User Authentication**: Secure email/password login
+- **Offline Support**: Works offline, syncs when online
+- **Automatic Backup**: Never lose your data again
+
+### 💾 Local Database (Fallback)
 - Data stored in browser's local storage
 - Persistent across browser sessions
-- Edit and update existing entries
-- Delete unwanted entries
+- Works without internet connection
+- Automatic fallback if cloud sync disabled
 
 ### 📄 PDF Export
 - Professional PDF reports
@@ -43,11 +51,26 @@ A professional bilingual web application for tracking work hours with Euro curre
 
 ## How to Use
 
+### Quick Start (Local Storage)
 1. **Open the Application**
    - Simply open `index.html` in your web browser
 
 2. **Add Work Entry**
    - Fill in the date, start time, and end time
+
+### Cloud Setup (Recommended)
+1. **Set Up Firebase** (One-time setup)
+   - Follow the `FIREBASE_SETUP.md` guide
+   - Get your free Firebase configuration
+
+2. **Enable Cloud Sync**
+   - Click "Login" in the header
+   - Create account or sign in
+   - Your data will sync across all devices
+
+3. **Cross-Device Access**
+   - Log in with the same account on any device
+   - Your data will be available instantly
    - Enter your hourly rate in Euros
    - Hours and earnings are calculated automatically
    - Add any withdrawn amount and notes
@@ -75,11 +98,16 @@ A professional bilingual web application for tracking work hours with Euro curre
 
 ## Technical Details
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Storage**: Browser Local Storage
+- **Frontend**: Pure HTML5, CSS3, JavaScript (ES6+)
+- **Database**: 
+  - **Cloud**: Firebase Firestore (Google Cloud)
+  - **Local**: Browser IndexedDB with localStorage fallback
+- **Authentication**: Firebase Auth
+- **Styling**: Modern CSS with CSS Grid and Flexbox
 - **PDF Generation**: jsPDF library
-- **Icons**: Font Awesome
+- **Icons**: Font Awesome 6
 - **Responsive**: Mobile-first design
+- **Real-time**: Firebase real-time listeners
 
 ## Browser Compatibility
 

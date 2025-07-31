@@ -13,6 +13,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="firebase-integration.js"></script>
 </head>
 <body>
     <div class="container">
@@ -24,6 +30,14 @@
                     <span data-en="Time Tracker Pro" data-ar="متتبع الوقت المحترف">Time Tracker Pro</span>
                 </h1>
                 <div class="header-controls">
+                    <button class="cloud-sync-btn" onclick="toggleCloudSync()" id="cloudSyncBtn">
+                        <i class="fas fa-cloud"></i>
+                        <span data-en="Cloud Sync" data-ar="مزامنة السحابة">Cloud Sync</span>
+                    </button>
+                    <button class="auth-btn" onclick="toggleAuthModal()" id="authBtn">
+                        <i class="fas fa-user"></i>
+                        <span data-en="Login" data-ar="تسجيل الدخول">Login</span>
+                    </button>
                     <button class="lang-toggle" onclick="toggleLanguage()">
                         <i class="fas fa-language"></i>
                         <span class="lang-text">العربية</span>
@@ -186,6 +200,64 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-en="Cloud Authentication" data-ar="مصادقة السحابة">Cloud Authentication</h3>
+                <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+            </div>
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="showLoginTab()" data-en="Login" data-ar="تسجيل الدخول">Login</button>
+                <button class="tab-btn" onclick="showRegisterTab()" data-en="Register" data-ar="تسجيل جديد">Register</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail" data-en="Email" data-ar="البريد الإلكتروني">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword" data-en="Password" data-ar="كلمة المرور">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span data-en="Login" data-ar="تسجيل الدخول">Login</span>
+                </button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="registerEmail" data-en="Email" data-ar="البريد الإلكتروني">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword" data-en="Password" data-ar="كلمة المرور">Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword" data-en="Confirm Password" data-ar="تأكيد كلمة المرور">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    <span data-en="Register" data-ar="تسجيل جديد">Register</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cloud Sync Status -->
+    <div id="syncStatus" class="sync-status" style="display: none;">
+        <div class="sync-indicator">
+            <i class="fas fa-sync fa-spin"></i>
+            <span data-en="Syncing with cloud..." data-ar="مزامنة مع السحابة...">Syncing with cloud...</span>
+        </div>
     </div>
 
     <!-- Edit Modal -->
